@@ -13,7 +13,7 @@ open class TimerConfiguration {
     }
 
     @Scheduled(fixedDelay = 5000)
-    open fun doSomething() {
+    fun doSomething() {
         logger.info("Doing something every 5 seconds!")
     }
 }

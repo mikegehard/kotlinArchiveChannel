@@ -35,7 +35,8 @@ repositories {
 dependencies {
     compile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
     compile('org.springframework.boot:spring-boot-starter')
-    compile('org.springframework.boot:spring-boot-devtools')
+    // Removing this fixes the non-zero return code problem.
+//    compile('org.springframework.boot:spring-boot-devtools')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 

@@ -21,13 +21,14 @@ apply plugin: 'spring-boot'
 
 jar {
     baseName = rootProject.name
-    version = '0.0.1-SNAPSHOT'
+    version = version
 }
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
+    jcenter()
     mavenCentral()
     maven { url "https://repo.spring.io/milestone" }
 }
@@ -37,12 +38,14 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter')
     // Removing this fixes the non-zero return code problem.
 //    compile('org.springframework.boot:spring-boot-devtools')
-    testCompile('org.springframework.boot:spring-boot-starter-test')
-}
+    compile("com.squareup.okhttp3:okhttp:3.2.0")
+    compile("com.fasterxml.jackson.core:jackson-databind:2.7.3")
+    compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.7.1-2")
 
-sourceSets {
-    // no need to separate Kotlin and Java because
-    // file extensions will show the difference
-    main.kotlin.srcDirs += "src/main"
-    main.kotlin.srcDirs += "src/test"
+    testCompile("org.jetbrains.kotlin:kotlin-test:${kotlinVersion}")
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile("io.damo.kspec:kspec:1.2.1")
+    testCompile("org.assertj:assertj-core:3.4.1")
+    testCompile("org.mock-server:mockserver-netty:3.10.4")
+
 }

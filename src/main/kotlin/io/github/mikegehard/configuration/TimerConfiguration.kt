@@ -1,5 +1,7 @@
 package io.github.mikegehard.configuration
 
+import io.github.mikegehard.slack.SlackHost
+import io.github.mikegehard.slack.archiveEmptyChannels
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.EnableScheduling
@@ -13,7 +15,12 @@ open class TimerConfiguration {
     }
 
     @Scheduled(fixedDelay = 5000)
-    fun doSomething() {
-        logger.info("Doing something every 5 seconds!")
+    fun runArchiveEmptyChannels() {
+        val server = "slack.com"
+        val port = 80
+        val token = "some-slack-token"
+
+        logger.info("********** Archiving empty channels! ************")
+        archiveEmptyChannels(SlackHost(server, port, token))
     }
 }

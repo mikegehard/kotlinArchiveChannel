@@ -1,10 +1,12 @@
 package io.github.mikegehard.slack
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import okhttp3.*
+import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 
 fun archiveEmptyChannels(host: SlackHost) {
     getActiveChannels(host).filter { it.empty }.forEach {
@@ -14,20 +16,16 @@ fun archiveEmptyChannels(host: SlackHost) {
 
 private fun archive(host: SlackHost, channel: SlackChannel) {
     val client = OkHttpClient();
-
-    val factory = JsonNodeFactory(false);
-    val bodyContents = factory.objectNode();
-    bodyContents.put("channel", channel.id)
-    bodyContents.put("token", host.token)
-
-    val body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), bodyContents.toString());
-
-    val url = apiUrlFor(host).addPathSegment("channels.archive")
+    val url = apiUrlFor(host).apply {
+        addQueryParameter("channel", channel.id)
+        addQueryParameter("token", host.token)
+        addPathSegment("channels.archive")
+    }
 
     val request = Request.Builder()
             .url(url.build())
-            .post(body)
 
+    // need to log some sort of message if this fails so I can see why??
     client.execute(request.build())
 }
 
@@ -43,14 +41,17 @@ private fun getActiveChannels(host: SlackHost): List<SlackChannel> {
     val request = Request.Builder()
             .url(url.build())
 
+    // what happens if this fails??
+
     return channelsFrom(client.execute(request.build()))
 }
 
+// TODO: Move to SlackHost class
 private fun apiUrlFor(host: SlackHost): HttpUrl.Builder = HttpUrl.Builder()
         .apply {
-            scheme("http")
+            scheme(host.scheme)
             port(host.port)
-            host(host.server)
+            host(host.host)
             addPathSegment("api")
         }
 

@@ -1,7 +1,6 @@
 // Notice no package declaration
 // Experimenting with only exposing a small public interface
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import io.damo.kspec.Spec
 import io.github.mikegehard.slack.SlackHost
 import io.github.mikegehard.slack.archiveEmptyChannels
@@ -22,23 +21,12 @@ class ArchiveSpec : Spec({
             val client = MockServerClient(server, port)
             val slackToken = "some-long-token"
 
-            val getChannelsRequest = HttpRequest().apply {
-                withMethod("GET")
-                withPath("/api/channels.list")
-                withQueryStringParameters(Parameter("token", slackToken))
-                withQueryStringParameters(Parameter("exclude_archived", "1"))
-            }
-
             val channelWithMembersId = "withMembersId"
             val channelWithoutMembersId = "withoutMembersId"
 
-            val getChannelResponse = HttpResponse().apply {
-                withBody(getChannelJsonFor(channelWithMembersId, channelWithoutMembersId))
-            }
+            client.`when`(getChannelsRequestFor(slackToken)).respond(getChannelResponseFor(channelWithMembersId, channelWithoutMembersId))
 
-            client.`when`(getChannelsRequest).respond(getChannelResponse)
-
-            archiveEmptyChannels(SlackHost(server, port, slackToken))
+            archiveEmptyChannels(SlackHost("$server:$port", false, slackToken))
 
             client.verify(archiveRequestFor(channelWithoutMembersId, slackToken))
             client.verify(archiveRequestFor(channelWithMembersId, slackToken), VerificationTimes.exactly(0))
@@ -48,32 +36,41 @@ class ArchiveSpec : Spec({
     }
 })
 
-private fun archiveRequestFor(channelId: String, token: String): HttpRequest {
-    val factory = JsonNodeFactory(false);
-    val body = factory.objectNode();
-    body.put("channel", channelId)
-    body.put("token", token)
+private fun getChannelsRequestFor(token: String): HttpRequest = HttpRequest().apply {
+    withMethod("GET")
+    withPath("/api/channels.list")
+    withQueryStringParameters(Parameter("token", token))
+    withQueryStringParameters(Parameter("exclude_archived", "1"))
+}
 
-    return HttpRequest().apply {
-        withMethod("POST")
-        withPath("/api/channels.archive")
-        withHeader("Content-Type", "application/json; charset=utf-8")
-        withBody(body.toString())
-    }
+private fun getChannelResponseFor(channelWithMembersId: String, channelWithoutMembersId: String) = HttpResponse().apply {
+    withBody(getChannelJsonFor(channelWithMembersId, channelWithoutMembersId))
+}
+
+private fun archiveRequestFor(channelId: String, token: String): HttpRequest = HttpRequest().apply {
+    withMethod("GET")
+    withPath("/api/channels.archive")
+    withQueryStringParameters(Parameter("token", token))
+    withQueryStringParameters(Parameter("channel", channelId))
 }
 
 private fun getChannelJsonFor(channelWithMembersId: String, channelWithoutMembersId: String): String {
+    // make sure you have some extra fields so that you test the annotations
+    // that ignore json attributes that aren't fields in the object
+
     return """
 {
     "ok": true,
     "channels": [
         {
             "id": "$channelWithMembersId",
-            "num_members": 6
+            "num_members": 6,
+            "name": "With members"
         },
         {
             "id": "$channelWithoutMembersId",
-            "num_members": 0
+            "num_members": 0,
+            "name": "Without members"
         }
     ]
 }

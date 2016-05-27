@@ -15,7 +15,7 @@ open class TimerConfiguration {
         val logger = LoggerFactory.getLogger(TimerConfiguration::class.java)
     }
 
-    @Value("\${slack.server}")
+    @Value("\${slack.server:slack.com}")
     lateinit var server:String
 
     @Value("\${slack.token}")

@@ -24,4 +24,20 @@ The following environment variables are optional:
 
 ## Deployment to Cloud Foundry
 
-See `scripts/deploy.sh`.
+**NOTE: You need a version of the CF CLI that allows the `-u`
+flag to allow the manifest to turn the healthcheck off. Manifest tested with
+`cf version 6.18.1+a1103f0-2016-05-24.`**
+
+For the first time:
+
+```
+$ cf push -f cf-manifest.yml -p <pathToJar> --no-start
+$ cf set-env archive-slack-channels SLACK_ARCHIVE_EMPTY_CHANNEL_SCHEDULE <someCronSchedule>
+$ cf set-env archive-slack-channels SLACK_TOKEN <someSlackToken>
+$ cf start archive-slack-channels
+```
+
+The rest of the time:
+```
+$ cf push -f cf-manifest.yml -p <pathToJar>
+```

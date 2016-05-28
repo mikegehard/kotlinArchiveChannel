@@ -4,5 +4,4 @@ applications:
   memory: 1G
   no-route: true
   buildpack: java_buildpack
-  path: build/libs/archiveChannels-1.0-SNAPSHOT.jar
   health-check-type: none

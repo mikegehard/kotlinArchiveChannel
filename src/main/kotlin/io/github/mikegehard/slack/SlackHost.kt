@@ -42,6 +42,7 @@ data class SlackHost(val hostPort: String, val secure: Boolean, val token: Strin
                 scheme(scheme)
                 host(host)
                 addPathSegment("api")
+                addQueryParameter("token", token)
             }
 
             return addPort(builder).build()

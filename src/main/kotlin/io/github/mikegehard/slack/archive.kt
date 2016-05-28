@@ -14,41 +14,34 @@ fun archiveEmptyChannels(host: SlackHost) {
 }
 
 private fun archive(host: SlackHost, channel: SlackChannel) {
-    val client = OkHttpClient();
     val url = host.apiUrl.newBuilder().apply {
         addQueryParameter("channel", channel.id)
-        addQueryParameter("token", host.token)
         addPathSegment("channels.archive")
-    }
+    }.build()
 
-    val request = Request.Builder()
-            .url(url.build())
+    val request = Request.Builder().url(url).build()
 
     // need to log some sort of message if this fails so I can see why??
-    client.execute(request.build())
+    execute(request)
 }
 
 private fun getActiveChannels(host: SlackHost): List<SlackChannel> {
-    val client = OkHttpClient();
+    fun channelsFrom(response: Response): List<SlackChannel> {
+        val mapper = ObjectMapper().registerKotlinModule()
+        val content = response.body().string()
+        return mapper.readValue<SlackGetChannelResponse>(content).channels
+    }
 
     val url = host.apiUrl.newBuilder().apply {
         addPathSegment("channels.list")
         addQueryParameter("exclude_archived", "1")
-        addQueryParameter("token", host.token)
-    }
+    }.build()
 
-    val request = Request.Builder()
-            .url(url.build())
+    val request = Request.Builder().url(url).build()
 
     // what happens if this fails??
 
-    return channelsFrom(client.execute(request.build()))
+    return channelsFrom(execute(request))
 }
 
-private fun channelsFrom(response: Response): List<SlackChannel> {
-    val mapper = ObjectMapper().registerKotlinModule()
-    val content = response.body().string()
-    return mapper.readValue<SlackGetChannelResponse>(content).channels
-}
-
-private fun OkHttpClient.execute(request: Request): Response = newCall(request).execute()
+private fun execute(request: Request): Response = OkHttpClient().newCall(request).execute()

@@ -3,7 +3,6 @@ package io.github.mikegehard.slack
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -16,7 +15,7 @@ fun archiveEmptyChannels(host: SlackHost) {
 
 private fun archive(host: SlackHost, channel: SlackChannel) {
     val client = OkHttpClient();
-    val url = apiUrlFor(host).apply {
+    val url = host.apiUrl.newBuilder().apply {
         addQueryParameter("channel", channel.id)
         addQueryParameter("token", host.token)
         addPathSegment("channels.archive")
@@ -32,7 +31,7 @@ private fun archive(host: SlackHost, channel: SlackChannel) {
 private fun getActiveChannels(host: SlackHost): List<SlackChannel> {
     val client = OkHttpClient();
 
-    val url = apiUrlFor(host).apply {
+    val url = host.apiUrl.newBuilder().apply {
         addPathSegment("channels.list")
         addQueryParameter("exclude_archived", "1")
         addQueryParameter("token", host.token)
@@ -45,15 +44,6 @@ private fun getActiveChannels(host: SlackHost): List<SlackChannel> {
 
     return channelsFrom(client.execute(request.build()))
 }
-
-// TODO: Move to SlackHost class
-private fun apiUrlFor(host: SlackHost): HttpUrl.Builder = HttpUrl.Builder()
-        .apply {
-            scheme(host.scheme)
-            port(host.port)
-            host(host.host)
-            addPathSegment("api")
-        }
 
 private fun channelsFrom(response: Response): List<SlackChannel> {
     val mapper = ObjectMapper().registerKotlinModule()

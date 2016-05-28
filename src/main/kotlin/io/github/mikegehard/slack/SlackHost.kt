@@ -1,26 +1,49 @@
 package io.github.mikegehard.slack
 
+import okhttp3.HttpUrl
+
 
 // Host - hostname:port, where port is optional
 data class SlackHost(val hostPort: String, val secure: Boolean, val token: String) {
-    val host: String
-        get() = hostPort.split(":")[0]
+    private val parts: List<String>
+        get() = hostPort.split(":")
 
-    val scheme: String
+    private val host: String
+        get() = parts[0]
+
+    private val port: Int?
+        get() = if (parts.size > 1) {
+            try {
+                parts[1].toInt()
+            } catch (e: NumberFormatException) {
+                null
+            }
+        } else {
+            null
+        }
+
+    private val scheme: String
         get() = if (secure) "https" else "http"
 
-    val port: Int
+    private fun addPort(builder: HttpUrl.Builder): HttpUrl.Builder {
+        val port = this.port
+        if (port == null) {
+            return builder
+        } else {
+            return builder.port(port)
+        }
+    }
+
+    val apiUrl: HttpUrl
         get() {
-            val parts = hostPort.split(":")
+            val builder = HttpUrl.Builder()
 
-            if (parts.size == 1) {
-                return if (secure) 443 else 80
+            builder.apply {
+                scheme(scheme)
+                host(host)
+                addPathSegment("api")
             }
 
-            try {
-                return parts[1].toInt()
-            } catch(e: NumberFormatException) {
-                return if (secure) 443 else 80
-            }
+            return addPort(builder).build()
         }
 }

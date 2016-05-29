@@ -3,7 +3,7 @@
 
 import io.damo.kspec.Spec
 import io.github.mikegehard.slack.SlackHost
-import io.github.mikegehard.slack.archiveEmptyChannels
+import io.github.mikegehard.slack.archiveChannels
 import org.mockserver.client.server.MockServerClient
 import org.mockserver.integration.ClientAndServer.startClientAndServer
 import org.mockserver.model.HttpRequest
@@ -20,16 +20,20 @@ class ArchiveSpec : Spec({
             val mockServer = startClientAndServer(port)
             val client = MockServerClient(server, port)
             val slackToken = "some-long-token"
+            val slackHost = SlackHost("$server:$port", false, slackToken)
 
-            val channelWithMembersId = "withMembersId"
-            val channelWithoutMembersId = "withoutMembersId"
+            val channelWithMinimumNumberOfMembersId = "channelWithMinimumNumberOfMembersId"
+            val channelWithoutMinimumNumberOfMembersId = "channelWithoutMinimumNumberOfMembersId"
+            val archivingMessage = "Archiving Channel"
 
-            client.`when`(getChannelsRequestFor(slackToken)).respond(getChannelResponseFor(channelWithMembersId, channelWithoutMembersId))
+            client.`when`(getChannelsRequestFor(slackToken)).respond(getChannelResponseFor(channelWithMinimumNumberOfMembersId, channelWithoutMinimumNumberOfMembersId))
 
-            archiveEmptyChannels(SlackHost("$server:$port", false, slackToken))
+            archiveChannels(slackHost, 1, archivingMessage)
 
-            client.verify(archiveRequestFor(channelWithoutMembersId, slackToken))
-            client.verify(archiveRequestFor(channelWithMembersId, slackToken), VerificationTimes.exactly(0))
+            client.verify(archiveRequestFor(channelWithoutMinimumNumberOfMembersId, slackToken))
+            client.verify(sendMessageTo(channelWithoutMinimumNumberOfMembersId, archivingMessage, slackToken))
+            client.verify(archiveRequestFor(channelWithMinimumNumberOfMembersId, slackToken), VerificationTimes.exactly(0))
+            client.verify(sendMessageTo(channelWithMinimumNumberOfMembersId, archivingMessage, slackToken), VerificationTimes.exactly(0))
 
             mockServer.stop()
         }
@@ -52,6 +56,14 @@ private fun archiveRequestFor(channelId: String, token: String): HttpRequest = H
     withPath("/api/channels.archive")
     withQueryStringParameters(Parameter("token", token))
     withQueryStringParameters(Parameter("channel", channelId))
+}
+
+private fun sendMessageTo(channelId: String, text: String, token: String): HttpRequest = HttpRequest().apply {
+    withMethod("GET")
+    withPath("/api/chat.postMessage")
+    withQueryStringParameters(Parameter("token", token))
+    withQueryStringParameters(Parameter("channel", channelId))
+    withQueryStringParameter(Parameter("text", text))
 }
 
 private fun getChannelJsonFor(channelWithMembersId: String, channelWithoutMembersId: String): String {

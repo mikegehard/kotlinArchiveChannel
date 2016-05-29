@@ -8,6 +8,8 @@ internal data class SlackChannel(
         val id: String,
         @JsonProperty("num_members") val members: Int
 ) {
-    val empty: Boolean
-    get() = members == 0
+    fun hasLessThan(members: Int): Boolean {
+        return this.members < members
+    }
+
 }

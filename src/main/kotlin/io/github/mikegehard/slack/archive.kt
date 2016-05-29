@@ -7,10 +7,26 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 
-fun archiveEmptyChannels(host: SlackHost) {
-    getActiveChannels(host).filter { it.empty }.forEach {
-        archive(host, it)
-    }
+fun archiveChannels(host: SlackHost, minimumMembers: Int, archiveMessage: String?) {
+    getActiveChannels(host)
+            .filter { it.hasLessThan(minimumMembers) }
+            .forEach { channel ->
+                archiveMessage?.let { message -> postChat(host, channel, message) }
+                archive(host, channel)
+            }
+}
+
+private fun postChat(host: SlackHost, channel: SlackChannel, message: String) {
+    val url = host.apiUrl.newBuilder().apply {
+        addQueryParameter("channel", channel.id)
+        addQueryParameter("text", message)
+        addPathSegment("chat.postMessage")
+    }.build()
+
+    val request = Request.Builder().url(url).build()
+
+    // need to log some sort of message if this fails so I can see why??
+    execute(request)
 }
 
 private fun archive(host: SlackHost, channel: SlackChannel) {

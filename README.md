@@ -2,7 +2,9 @@
 
 ## Functionality
 
-* Archive all empty channels on a cron schedule
+* Archive all channels that do not have a minimum number of members
+ on a cron schedule. Optionally you can post a message to the channel
+ before it is archived.
 
 ## Development
 
@@ -21,6 +23,8 @@ For example, `0 0 1 * * ?` is 1am every day of the week. See [Quartz documentati
 The following environment variables are optional:
 
 * SLACK_SERVER - defaults to `slack.com`
+* SLACK_MINIMUM_NUMBER_OF_MEMBERS - Threshold for archiving channels. Defaults to 1, which will only archive empty channels.
+* SLACK_ARCHIVE_MESSAGE - message to send to any archived channels. See [Slack message builder](https://api.slack.com/docs/formatting/builder) for help crafting a message.
 
 ## Deployment to Cloud Foundry
 

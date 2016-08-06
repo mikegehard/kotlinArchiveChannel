@@ -11,7 +11,7 @@ fun archiveChannels(host: SlackHost, minimumMembers: Int, archiveMessage: String
     getActiveChannels(host)
             .filter { it.hasLessThan(minimumMembers) }
             .forEach { channel ->
-                archiveMessage?.let { message -> postChat(host, channel, message) }
+                archiveMessage?.let { postChat(host, channel, it) }
                 archive(host, channel)
             }
 }

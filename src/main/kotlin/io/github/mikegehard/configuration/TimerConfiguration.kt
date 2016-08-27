@@ -25,7 +25,7 @@ open class TimerConfiguration {
     @Value("\${slack.minimum.number.of.members:1}")
     lateinit var minimumNumberOfMembers: String
 
-    @Value("\${slack.daysSinceLastMessage:30}")
+    @Value("\${slack.days.since.last.message:30}")
     lateinit var daysSinceLastMessage: String
 
     @Value("\${slack.archive.message:#{null}}")

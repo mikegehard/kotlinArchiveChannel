@@ -29,6 +29,7 @@ class SlackChannelSpec : Spec({
     }
 
     test("channelFrom") {
+        // TODO: Extract test helper because this is duplicated in archiveSpec.kt
         val jsonWithNanos = """
 {
     "ok": true,
@@ -49,6 +50,7 @@ class SlackChannelSpec : Spec({
 
         assertEquals(expectedMessageWithNanos, channelFrom(jsonWithNanos).lastMessage)
 
+        // TODO: Extract test helper because this is duplicated in archiveSpec.kt
         val jsonWithoutNanos = """
 {
     "ok": true,

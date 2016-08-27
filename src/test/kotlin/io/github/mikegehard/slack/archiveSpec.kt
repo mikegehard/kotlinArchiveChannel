@@ -137,6 +137,7 @@ private fun getChannelJsonFor(channelId: String, lastMessageDate: Instant): Stri
     // make sure you have some extra fields so that you test the annotations
     // that ignore json attributes that aren't fields in the object
 
+    // TODO: Extract test helper because this is duplicated in SlackChannelSpec.kt
     return """
 {
     "ok": true,

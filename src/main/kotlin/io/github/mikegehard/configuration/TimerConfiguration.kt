@@ -41,7 +41,7 @@ open class TimerConfiguration {
         )
     }
 
-    @Scheduled(cron = "\${slack.archive.empty.channel.schedule}")
+    @Scheduled(cron = "\${slack.archive.stale.channel.schedule}")
     fun runArchiveStaleChannels() {
         logger.info("********** Archiving stale channels! ************")
         archiveStaleChannels(

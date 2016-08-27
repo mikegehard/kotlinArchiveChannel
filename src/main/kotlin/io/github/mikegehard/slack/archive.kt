@@ -3,6 +3,7 @@ package io.github.mikegehard.slack
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.github.mikegehard.slack.timeExtensions.daysAgo
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -14,6 +15,30 @@ fun archiveChannels(host: SlackHost, minimumMembers: Int, archiveMessage: String
                 archiveMessage?.let { postChat(host, channel, it) }
                 archive(host, channel)
             }
+}
+
+fun archiveStaleChannels(host: SlackHost, daysSinceLastMessage: Long, archiveMessage: String?) {
+    getActiveChannels(host)
+            .withLastMessage(host)
+            .filter { it.staleAsOf(daysSinceLastMessage.daysAgo()) }
+            .forEach { channel ->
+                archiveMessage?.let { postChat(host, channel, it) }
+                archive(host, channel)
+            }
+}
+
+private fun List<SlackChannel>.withLastMessage(host: SlackHost): List<SlackChannel> =
+        this.map { getChannelInfo(host, it) }
+
+private fun getChannelInfo(host: SlackHost, channel: SlackChannel): SlackChannel {
+    val url = host.apiUrl.newBuilder().apply {
+        addQueryParameter("channel", channel.id)
+        addPathSegment("channels.info")
+    }.build()
+
+    val request = Request.Builder().url(url).build()
+
+    return parseFromJson(execute(request).body().string())
 }
 
 private fun postChat(host: SlackHost, channel: SlackChannel, message: String) {

@@ -50,6 +50,4 @@ open class TimerConfiguration {
                 archiveMessage
         )
     }
-
-
 }

@@ -2,6 +2,7 @@ package io.github.mikegehard.configuration
 
 import io.github.mikegehard.slack.SlackHost
 import io.github.mikegehard.slack.archiveChannels
+import io.github.mikegehard.slack.archiveStaleChannels
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
@@ -24,6 +25,9 @@ open class TimerConfiguration {
     @Value("\${slack.minimum.number.of.members:1}")
     lateinit var minimumNumberOfMembers: String
 
+    @Value("\${slack.days.since.last.message:30}")
+    lateinit var daysSinceLastMessage: String
+
     @Value("\${slack.archive.message:#{null}}")
     var archiveMessage: String? = null
 
@@ -33,6 +37,16 @@ open class TimerConfiguration {
         archiveChannels(
                 SlackHost(server, true, token),
                 minimumNumberOfMembers.toInt(),
+                archiveMessage
+        )
+    }
+
+    @Scheduled(cron = "\${slack.archive.stale.channel.schedule}")
+    fun runArchiveStaleChannels() {
+        logger.info("********** Archiving stale channels! ************")
+        archiveStaleChannels(
+                SlackHost(server, true, token),
+                daysSinceLastMessage.toLong(),
                 archiveMessage
         )
     }

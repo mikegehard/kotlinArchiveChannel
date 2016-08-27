@@ -13,7 +13,7 @@ fun archiveChannels(host: SlackHost, minimumMembers: Int, archiveMessage: String
 
 fun archiveStaleChannels(host: SlackHost, daysSinceLastMessage: Long, archiveMessage: String?) {
     getActiveChannels(host)
-            .withLastMessage(host)
+            .withAdditionalInformation(host)
             .filter { it.staleAsOf(daysSinceLastMessage.daysAgo()) }
             .forEach { archive(host, it, archiveMessage) }
 }
@@ -23,7 +23,7 @@ private fun archive(host: SlackHost, channel: SlackChannel, message: String?) {
     archive(host, channel)
 }
 
-private fun List<SlackChannel>.withLastMessage(host: SlackHost): List<SlackChannel> =
+private fun List<SlackChannel>.withAdditionalInformation(host: SlackHost): List<SlackChannel> =
         this.map { getChannelInfo(host, it) }
 
 private fun getChannelInfo(host: SlackHost, channel: SlackChannel): SlackChannel {

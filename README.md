@@ -20,11 +20,14 @@ The following environment variables are required:
 * SLACK_ARCHIVE_EMPTY_CHANNEL_SCHEDULE - 6 field cron pattern.
 For example, `0 0 1 * * ?` is 1am every day of the week. See [Quartz documentation](http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/tutorial-lesson-06.html#TutorialLesson6-CronExpressions) for examples of cron schedule strings.
 
+* SLACK_ARCHIVE_STALE_CHANNEL_SCHEDULE - See above for pattern.
+
 The following environment variables are optional:
 
 * SLACK_SERVER - defaults to `slack.com`
 * SLACK_MINIMUM_NUMBER_OF_MEMBERS - Threshold for archiving channels. Defaults to 1, which will only archive empty channels.
 * SLACK_ARCHIVE_MESSAGE - message to send to any archived channels. See [Slack message builder](https://api.slack.com/docs/formatting/builder) for help crafting a message.
+* SLACK_DAYS_SINCE_LAST_MESSAGE - Number of days since last message to consider a channel stale. Defaults to 30.
 
 ## Deployment to Cloud Foundry
 
@@ -37,6 +40,7 @@ For the first time:
 ```
 $ cf push -f cf-manifest.yml -p <pathToJar> --no-start
 $ cf set-env archive-slack-channels SLACK_ARCHIVE_EMPTY_CHANNEL_SCHEDULE <someCronSchedule>
+$ cf set-env archive-slack-channels SLACK_ARCHIVE_STALE_CHANNEL_SCHEDULE <someCronSchedule>
 $ cf set-env archive-slack-channels SLACK_TOKEN <someSlackToken>
 $ cf start archive-slack-channels
 ```

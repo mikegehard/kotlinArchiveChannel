@@ -20,8 +20,13 @@ data class SlackChannel(
             lastMessage?.timestamp?.isBefore(instant) ?: false
 }
 
-fun parseFromJson(json: String): SlackChannel {
+fun channelFrom(json: String): SlackChannel {
     val mapper = ObjectMapper().registerKotlinModule()
     mapper.registerModule(JavaTimeModule())
     return mapper.readValue<SlackGetChannelInfoResponse>(json).channel
+}
+
+fun channelsFrom(json: String): List<SlackChannel> {
+    val mapper = ObjectMapper().registerKotlinModule()
+    return mapper.readValue<SlackGetChannelResponse>(json).channels
 }

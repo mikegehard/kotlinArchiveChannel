@@ -28,7 +28,7 @@ class SlackChannelSpec : Spec({
         assertFalse(SlackChannel(id = "abc123", members = 0).staleAsOf(oneDayAgo))
     }
 
-    test("parseFromJson") {
+    test("channelFrom") {
         val jsonWithNanos = """
 {
     "ok": true,
@@ -47,7 +47,7 @@ class SlackChannelSpec : Spec({
 
         val expectedMessageWithNanos = SlackMessage(timestamp = Instant.parse("2016-08-27T01:48:29.123450Z"))
 
-        assertEquals(expectedMessageWithNanos, parseFromJson(jsonWithNanos).lastMessage)
+        assertEquals(expectedMessageWithNanos, channelFrom(jsonWithNanos).lastMessage)
 
         val jsonWithoutNanos = """
 {
@@ -67,6 +67,6 @@ class SlackChannelSpec : Spec({
 
         val expectedMessageWithoutNanos = SlackMessage(timestamp = Instant.parse("2016-08-27T01:48:29Z"))
 
-        assertEquals(expectedMessageWithoutNanos, parseFromJson(jsonWithoutNanos).lastMessage)
+        assertEquals(expectedMessageWithoutNanos, channelFrom(jsonWithoutNanos).lastMessage)
     }
 })

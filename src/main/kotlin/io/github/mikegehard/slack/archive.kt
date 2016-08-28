@@ -5,18 +5,16 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 
-fun archiveChannels(host: SlackHost, minimumMembers: Int, archiveMessage: String?) {
-    getActiveChannels(host)
-            .filter { it.hasLessThan(minimumMembers) }
-            .forEach { archive(host, it, archiveMessage) }
-}
+fun archiveChannels(host: SlackHost, minimumMembers: Int, archiveMessage: String?) =
+        getActiveChannels(host)
+                .filter { it.hasLessThan(minimumMembers) }
+                .forEach { archive(host, it, archiveMessage) }
 
-fun archiveStaleChannels(host: SlackHost, daysSinceLastMessage: Long, archiveMessage: String?) {
-    getActiveChannels(host)
-            .withAdditionalInformation(host)
-            .filter { it.staleAsOf(daysSinceLastMessage.daysAgo()) }
-            .forEach { archive(host, it, archiveMessage) }
-}
+fun archiveStaleChannels(host: SlackHost, daysSinceLastMessage: Long, archiveMessage: String?) =
+        getActiveChannels(host)
+                .withAdditionalInformation(host)
+                .filter { it.staleAsOf(daysSinceLastMessage.daysAgo()) }
+                .forEach { archive(host, it, archiveMessage) }
 
 private fun archive(host: SlackHost, channel: SlackChannel, message: String?) {
     message?.let { postChat(host, channel, it) }
@@ -27,10 +25,10 @@ private fun List<SlackChannel>.withAdditionalInformation(host: SlackHost): List<
         this.map { getChannelInfo(host, it) }
 
 private fun getChannelInfo(host: SlackHost, channel: SlackChannel): SlackChannel {
-    val url = host.apiUrl.newBuilder().apply {
+    val url = host.url {
         addQueryParameter("channel", channel.id)
         addPathSegment("channels.info")
-    }.build()
+    }
 
     val request = Request.Builder().url(url).build()
 
@@ -38,11 +36,11 @@ private fun getChannelInfo(host: SlackHost, channel: SlackChannel): SlackChannel
 }
 
 private fun postChat(host: SlackHost, channel: SlackChannel, message: String) {
-    val url = host.apiUrl.newBuilder().apply {
+    val url = host.url {
         addQueryParameter("channel", channel.id)
         addQueryParameter("text", message)
         addPathSegment("chat.postMessage")
-    }.build()
+    }
 
     val request = Request.Builder().url(url).build()
 
@@ -51,10 +49,10 @@ private fun postChat(host: SlackHost, channel: SlackChannel, message: String) {
 }
 
 private fun archive(host: SlackHost, channel: SlackChannel) {
-    val url = host.apiUrl.newBuilder().apply {
+    val url = host.url {
         addQueryParameter("channel", channel.id)
         addPathSegment("channels.archive")
-    }.build()
+    }
 
     val request = Request.Builder().url(url).build()
 
@@ -63,10 +61,10 @@ private fun archive(host: SlackHost, channel: SlackChannel) {
 }
 
 private fun getActiveChannels(host: SlackHost): List<SlackChannel> {
-    val url = host.apiUrl.newBuilder().apply {
+    val url = host.url {
         addPathSegment("channels.list")
         addQueryParameter("exclude_archived", "1")
-    }.build()
+    }
 
     val request = Request.Builder().url(url).build()
 

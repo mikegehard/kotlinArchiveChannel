@@ -1,0 +1,11 @@
+machine:
+  java:
+    version: oraclejdk8 # default but let's be explicit anyway
+
+test:
+  override:
+    - "./gradlew build" # default is gradle test and this saves an additional step
+
+general:
+  artifacts:
+    - "build/libs"

@@ -1,5 +1,7 @@
 # Kotlin/SpringBoot Archive Channels Slack Bot
 
+Build status: [![build status](https://circleci.com/gh/mikegehard/kotlinArchiveChannel.png?circle-token=76ea39485ce1b61d7dbb3524a9f373334d69b074 "Build Status")](https://circleci.com/gh/mikegehard/kotlinArchiveChannel)
+
 ## Functionality
 
 * Archive all channels that do not have a minimum number of members

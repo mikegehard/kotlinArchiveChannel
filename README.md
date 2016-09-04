@@ -8,6 +8,9 @@ Build status: [![build status](https://circleci.com/gh/mikegehard/kotlinArchiveC
  on a cron schedule. Optionally you can post a message to the channel
  before it is archived.
 
+* Archive channels that are stale. A stale channel means that the channel hasn't had a message posted in a certain number of 
+ days. This number of days is configurable via an environment variable.
+
 ## Development
 
 1. Clone repo.
